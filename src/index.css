@@ -1,0 +1,338 @@
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/DMSans-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/DMSans-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/DMSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-SemiBold.ttf") format("truetype");
+}
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Global box sizing */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+@theme inline {
+  --font-heading: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* shadcn color mappings → Émeraude design system */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Lernn custom colors (for use as Tailwind classes: bg-brand, text-brand-dark, etc.) */
+  --color-brand: #00ed64;
+  --color-brand-dark: #00684a;
+  --color-brand-soft: #e3fcf7;
+  --color-brand-on: #001e2b;
+  --color-canvas-alt: #f7f8fa;
+  --color-surface: #f9fbfa;
+  --color-surface-feature: #e3fcf7;
+  --color-hero-bg: #001e2b;
+  --color-hero-text: #ffffff;
+  --color-text-body: #1c2d38;
+  --color-text-secondary: #5c6c75;
+  --color-text-muted: #889397;
+  --color-text-placeholder: #b8c4c2;
+  --color-border-strong: #c1c7c6;
+  --color-cat-academic: #006dc6;
+  --color-cat-finance: #c76c17;
+  --color-cat-presence: #00684a;
+  --color-cat-admin: #6c40bf;
+  --color-role-director: #6c40bf;
+  --color-role-director-bg: #f1ebff;
+  --color-role-teacher: #006dc6;
+  --color-role-teacher-bg: #e1f1ff;
+  --color-role-parent: #c76c17;
+  --color-role-parent-bg: #fef5e8;
+  --color-role-student: #00684a;
+  --color-role-student-bg: #e3fcf7;
+  --color-role-staff: #5c6c75;
+  --color-role-staff-bg: #f0f2f1;
+  --color-grade-good: var(--grade-good);
+  --color-grade-good-bg: var(--grade-good-bg);
+  --color-grade-mid: var(--grade-mid);
+  --color-grade-mid-bg: var(--grade-mid-bg);
+  --color-grade-bad: var(--grade-bad);
+  --color-grade-bad-bg: var(--grade-bad-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-border: var(--info-border);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ============================================================
+   Lernn Émeraude Theme — Light (default, no dark mode for v1)
+   Mapped to shadcn token names
+   ============================================================ */
+:root {
+  /* Core surfaces */
+  --background: #ffffff;
+  --foreground: #001e2b;
+  --card: #ffffff;
+  --card-foreground: #001e2b;
+  --popover: #ffffff;
+  --popover-foreground: #001e2b;
+
+  /* Primary = brand green */
+  --primary: #00ed64;
+  --primary-foreground: #001e2b;
+
+  /* Secondary = outline/neutral style */
+  --secondary: #f7f8fa;
+  --secondary-foreground: #1c2d38;
+
+  /* Muted = subtle backgrounds */
+  --muted: #f7f8fa;
+  --muted-foreground: #5c6c75;
+
+  /* Accent = brand-soft highlight */
+  --accent: #e3fcf7;
+  --accent-foreground: #00684a;
+
+  /* Semantic */
+  --destructive: #cf4a22;
+  --warning: #c76c17;
+  --success: #00684a;
+
+  /* Borders & inputs */
+  --border: #e8edeb;
+  --input: #e8edeb;
+  --ring: #00ed64;
+
+  /* Radius — 8px base (matches --radius-input from design system) */
+  --radius: 0.5rem;
+
+  /* Charts (category domain colors) */
+  --chart-1: #00684a;
+  --chart-2: #006dc6;
+  --chart-3: #c76c17;
+  --chart-4: #6c40bf;
+  --chart-5: #cf4a22;
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #001e2b;
+  --sidebar-primary: #00684a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3fcf7;
+  --sidebar-accent-foreground: #00684a;
+  --sidebar-border: #e8edeb;
+  --sidebar-ring: #00ed64;
+
+  /* Grade colors */
+  --grade-good: #00684a;
+  --grade-good-bg: #e3fcf7;
+  --grade-mid: #c76c17;
+  --grade-mid-bg: #fef5e8;
+  --grade-bad: #cf4a22;
+  --grade-bad-bg: #fceee8;
+
+  /* Info colors */
+  --info: #006dc6;
+  --info-bg: #e1f1ff;
+  --info-border: #b6d9f4;
+
+  /* Shadows (Émeraude elevation) */
+  --shadow-sm: 0 1px 2px rgba(0, 30, 43, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 30, 43, 0.08);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 30, 43, 0.12);
+}
+
+/* ============================================================
+   Lernn Émeraude Theme — Dark
+   ============================================================ */
+.dark {
+  /* Core surfaces */
+  --background: #0f1419;
+  --foreground: #e8edeb;
+  --card: #1a2028;
+  --card-foreground: #e8edeb;
+  --popover: #1a2028;
+  --popover-foreground: #e8edeb;
+
+  /* Primary */
+  --primary: #00ed64;
+  --primary-foreground: #001e2b;
+
+  /* Secondary */
+  --secondary: #1f2937;
+  --secondary-foreground: #c1c7c6;
+
+  /* Muted */
+  --muted: #1f2937;
+  --muted-foreground: #889397;
+
+  /* Accent */
+  --accent: #0a2e24;
+  --accent-foreground: #00ed64;
+
+  /* Semantic */
+  --destructive: #e85d3a;
+  --warning: #e08a35;
+  --success: #00b85e;
+
+  /* Borders & inputs */
+  --border: #2d3748;
+  --input: #2d3748;
+  --ring: #00ed64;
+
+  /* Charts */
+  --chart-1: #00b85e;
+  --chart-2: #4a9fe8;
+  --chart-3: #e08a35;
+  --chart-4: #9b6ed6;
+  --chart-5: #e85d3a;
+
+  /* Sidebar */
+  --sidebar: #0f1419;
+  --sidebar-foreground: #e8edeb;
+  --sidebar-primary: #00b85e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0a2e24;
+  --sidebar-accent-foreground: #00ed64;
+  --sidebar-border: #2d3748;
+  --sidebar-ring: #00ed64;
+
+  /* Grade colors — brighter for dark backgrounds */
+  --grade-good: #3dd68c;
+  --grade-good-bg: #0a2e24;
+  --grade-mid: #f4a445;
+  --grade-mid-bg: #3a2508;
+  --grade-bad: #f07555;
+  --grade-bad-bg: #3d1a0e;
+
+  /* Info colors */
+  --info: #4a9fe8;
+  --info-bg: #0c2d4a;
+  --info-border: #1e4d7a;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .mobile-device-shell {
+    width: 100%;
+    max-width: min(100vw, 430px);
+  }
+
+  .mobile-sheet-shell {
+    width: 100%;
+    max-width: min(100vw, 430px);
+  }
+
+  @media (min-width: 768px) {
+    .mobile-device-shell {
+      max-width: min(100vw, 768px);
+    }
+
+    .mobile-sheet-shell {
+      max-width: min(100vw, 640px);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-device-shell {
+      max-width: min(100vw, 1024px);
+    }
+  }
+}
