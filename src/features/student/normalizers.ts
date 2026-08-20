@@ -27,6 +27,7 @@ export interface StudentScheduleSlot {
     identity: {
       firstName: string | null
       lastName: string | null
+      photoUrl?: string | null
     }
   }
 }

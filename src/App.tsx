@@ -11525,7 +11525,7 @@ function getSubjectTeachersFromSchedule(slots: StudentScheduleSlot[]) {
 
     if (!teachers.has(key)) {
       teachers.set(key, {
-        photoUrl: null,
+        photoUrl: slot.staffAssignment.identity.photoUrl ?? null,
         subjectCode: slot.subjectLevel.subject.code,
         subjectColor: null,
         subjectName: slot.subjectLevel.subject.name,

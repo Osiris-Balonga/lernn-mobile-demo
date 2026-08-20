@@ -7,9 +7,10 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 7610 --strictPort",
     "generate:i18n": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide",
+    "demo:sync-teacher-avatars": "node scripts/sync-teacher-avatars.mjs",
     "pretest": "pnpm generate:i18n",
     "build": "pnpm generate:i18n && tsr generate && tsc -b && vite build && node scripts/check-bundle-budget.mjs && node scripts/prepare-github-pages.mjs",
-    "test": "node --test tests/demo-repository.test.mjs tests/demo-ui-contract.test.mjs tests/companion-field-workspace.test.mjs tests/student-normalizers.test.mjs tests/student-dashboard-query-state.test.mjs tests/parent-academic-access.test.mjs tests/parent-report-cards.test.mjs tests/no-document-previews.test.mjs tests/notification-overlay.test.mjs tests/login-error.test.mjs tests/card-login-payload.test.mjs tests/teacher-contracts.test.mjs tests/lazy-import.test.mjs tests/current-date.test.mjs tests/format.test.mjs",
+    "test": "node --test tests/demo-repository.test.mjs tests/demo-ui-contract.test.mjs tests/congo-demo-data.test.mjs tests/companion-field-workspace.test.mjs tests/student-normalizers.test.mjs tests/student-dashboard-query-state.test.mjs tests/parent-academic-access.test.mjs tests/parent-report-cards.test.mjs tests/no-document-previews.test.mjs tests/notification-overlay.test.mjs tests/login-error.test.mjs tests/card-login-payload.test.mjs tests/teacher-contracts.test.mjs tests/lazy-import.test.mjs tests/current-date.test.mjs tests/format.test.mjs",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "pnpm generate:i18n && tsr generate && tsc -b --force",

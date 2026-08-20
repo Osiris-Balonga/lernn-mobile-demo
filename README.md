@@ -30,6 +30,16 @@ pnpm install
 pnpm dev
 ```
 
+Les portraits enseignants sont sélectionnés depuis Random User avec des
+identifiants stables puis conservés localement pour fiabiliser la démo :
+
+```bash
+pnpm demo:sync-teacher-avatars
+```
+
+Le détail des barèmes, matières, pondérations et dates se trouve dans
+[`DEMO_DATA_CONGO.md`](./DEMO_DATA_CONGO.md).
+
 Le serveur de développement écoute sur <http://localhost:7610/>. Il utilise la base `/`, sans proxy et sans appel à Lernn API.
 
 ## Vérifications

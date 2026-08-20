@@ -21,6 +21,7 @@ import type {
   DemoStudentFixture,
   DemoStudentId,
 } from "./types"
+import { getTeacherPhotoUrl } from "./teachers.ts"
 
 const SCHOOL = {
   id: "demo-school-ndg01",
@@ -56,6 +57,7 @@ type StudentSeed = {
   classCode: string
   className: string
   cycle: "Primaire" | "Collège" | "Lycée"
+  gradingScale: { min: 0; max: 10 | 20; passingGrade: 5 | 10 }
   rank: number
   totalStudents: number
   balance: number
@@ -79,6 +81,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
     classCode: "CE1-A",
     className: "Cours Élémentaire 1 A",
     cycle: "Primaire",
+    gradingScale: { min: 0, max: 10, passingGrade: 5 },
     rank: 3,
     totalStudents: 28,
     balance: 25_000,
@@ -91,39 +94,47 @@ const STUDENT_SEEDS: StudentSeed[] = [
         color: "#00684A",
         name: "Français",
         teacher: "Marie Okemba",
-        average: 16.5,
-        coefficient: 3,
+        average: 8.4,
+        coefficient: 6,
       },
       {
         code: "MAT",
         color: "#2563EB",
         name: "Mathématiques",
         teacher: "Estelle Ngoma",
-        average: 17.2,
-        coefficient: 3,
+        average: 8.8,
+        coefficient: 5,
       },
       {
-        code: "LEC",
+        code: "SCI",
         color: "#7C3AED",
-        name: "Lecture",
-        teacher: "Marie Okemba",
-        average: 15.8,
+        name: "Sciences",
+        teacher: "Alain Boukaka",
+        average: 8.1,
         coefficient: 2,
       },
       {
-        code: "EVE",
+        code: "ECM",
         color: "#D97706",
-        name: "Éveil",
-        teacher: "Alain Boukaka",
-        average: 14.9,
+        name: "Éducation civique et morale",
+        teacher: "Marie Okemba",
+        average: 8.6,
         coefficient: 2,
       },
       {
         code: "EPS",
         color: "#DC2626",
-        name: "Éducation physique",
+        name: "Éducation physique et sportive",
         teacher: "Junior Mpassi",
-        average: 18,
+        average: 9.1,
+        coefficient: 2,
+      },
+      {
+        code: "ART",
+        color: "#DB2777",
+        name: "Activités artistiques et musique",
+        teacher: "Nadine Mvouama",
+        average: 8.9,
         coefficient: 1,
       },
     ],
@@ -141,6 +152,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
     classCode: "5E-A",
     className: "Cinquième A",
     cycle: "Collège",
+    gradingScale: { min: 0, max: 20, passingGrade: 10 },
     rank: 6,
     totalStudents: 31,
     balance: 75_000,
@@ -154,7 +166,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Français",
         teacher: "Chantal Nkoua",
         average: 14.5,
-        coefficient: 4,
+        coefficient: 6,
       },
       {
         code: "MAT",
@@ -162,7 +174,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Mathématiques",
         teacher: "Patrick Loufoua",
         average: 15.8,
-        coefficient: 4,
+        coefficient: 5,
       },
       {
         code: "SVT",
@@ -170,7 +182,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Sciences de la vie et de la Terre",
         teacher: "Esther Mavoungou",
         average: 13.7,
-        coefficient: 3,
+        coefficient: 2,
       },
       {
         code: "HGE",
@@ -178,7 +190,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Histoire-Géographie",
         teacher: "Serge Kimbembe",
         average: 14.2,
-        coefficient: 3,
+        coefficient: 4,
       },
       {
         code: "ANG",
@@ -186,7 +198,47 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Anglais",
         teacher: "Grace Mayembo",
         average: 16.1,
+        coefficient: 4,
+      },
+      {
+        code: "PHY",
+        color: "#0891B2",
+        name: "Sciences physiques",
+        teacher: "Armand Bakala",
+        average: 13.9,
         coefficient: 2,
+      },
+      {
+        code: "DES",
+        color: "#EA580C",
+        name: "Dessin",
+        teacher: "Nadine Mvouama",
+        average: 15.6,
+        coefficient: 1,
+      },
+      {
+        code: "MUS",
+        color: "#C026D3",
+        name: "Musique",
+        teacher: "Cédric Mouanda",
+        average: 16.4,
+        coefficient: 1,
+      },
+      {
+        code: "EPS",
+        color: "#DC2626",
+        name: "Éducation physique et sportive",
+        teacher: "Junior Mpassi",
+        average: 16.8,
+        coefficient: 2,
+      },
+      {
+        code: "ECM",
+        color: "#92400E",
+        name: "Éducation civique et morale",
+        teacher: "Marie Okemba",
+        average: 15.1,
+        coefficient: 1,
       },
     ],
   },
@@ -203,6 +255,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
     classCode: "TERM-D",
     className: "Terminale D",
     cycle: "Lycée",
+    gradingScale: { min: 0, max: 20, passingGrade: 10 },
     rank: 4,
     totalStudents: 27,
     balance: 50_000,
@@ -216,7 +269,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Philosophie",
         teacher: "Pauline Kodia",
         average: 15.4,
-        coefficient: 4,
+        coefficient: 3,
       },
       {
         code: "MAT",
@@ -224,7 +277,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Mathématiques",
         teacher: "Lucien Moukoko",
         average: 16.8,
-        coefficient: 5,
+        coefficient: 4,
       },
       {
         code: "PHY",
@@ -240,7 +293,7 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Sciences de la vie et de la Terre",
         teacher: "Esther Mavoungou",
         average: 14.6,
-        coefficient: 4,
+        coefficient: 5,
       },
       {
         code: "ANG",
@@ -248,19 +301,34 @@ const STUDENT_SEEDS: StudentSeed[] = [
         name: "Anglais",
         teacher: "Grace Mayembo",
         average: 16.2,
+        coefficient: 3,
+      },
+      {
+        code: "HGE",
+        color: "#A16207",
+        name: "Histoire-Géographie",
+        teacher: "Serge Kimbembe",
+        average: 14.8,
+        coefficient: 3,
+      },
+      {
+        code: "EPS",
+        color: "#DC2626",
+        name: "Éducation physique et sportive",
+        teacher: "Junior Mpassi",
+        average: 17.2,
         coefficient: 2,
       },
     ],
   },
 ]
 
-const today = startOfDay(new Date())
-const schoolYearStart = shiftDays(today, -240)
-const schoolYearEnd = shiftDays(today, 125)
+const schoolYearStart = localDate(2025, 10, 1)
+const schoolYearEnd = localDate(2026, 6, 30)
 const PERIODS: AcademicPeriod[] = [
-  makePeriod(1, schoolYearStart, shiftDays(today, -150), "CLOSED"),
-  makePeriod(2, shiftDays(today, -149), shiftDays(today, -60), "CLOSED"),
-  makePeriod(3, shiftDays(today, -59), schoolYearEnd, "OPEN"),
+  makePeriod(1, localDate(2025, 10, 1), localDate(2025, 12, 22), "CLOSED"),
+  makePeriod(2, localDate(2026, 1, 5), localDate(2026, 3, 23), "CLOSED"),
+  makePeriod(3, localDate(2026, 4, 6), schoolYearEnd, "OPEN"),
 ]
 
 const STUDENTS = Object.fromEntries(
@@ -288,7 +356,10 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
   const identityId = `demo-identity-${seed.id}`
   const enrollmentId = `demo-enrollment-${seed.id}`
   const classGroupId = `demo-class-${seed.id}`
-  const periodAverage = weightedAverage(seed.subjects)
+  const annualAverage = weightedAverage(seed.subjects)
+  const currentPeriodAverage = round1(
+    weightedAverageFromRows(makeSubjectAverages(seed, 2))
+  )
   const card: DemoCardCredential = {
     studentId: seed.id,
     publicCode: seed.publicCode,
@@ -310,7 +381,7 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
       schoolYearLabel: "2025-2026",
     },
     grades: {
-      periodAverage,
+      periodAverage: currentPeriodAverage,
       rank: seed.rank,
       totalStudents: seed.totalStudents,
       subjectAverages: seed.subjects.map((subject) => ({
@@ -355,8 +426,8 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
             seed.totalStudents
           ),
           totalStudents: seed.totalStudents,
-          classAverage: 12.8 + periodIndex * 0.2,
-          gradingScale: { min: 0, max: 20, passingGrade: 10 },
+          classAverage: classAverageFor(seed, periodIndex),
+          gradingScale: seed.gradingScale,
           subjectAverages,
         },
       ],
@@ -376,7 +447,7 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
         teacherName: subject.teacher,
         schoolYear: { id: SCHOOL_YEAR_ID, label: "2025-2026" },
         period,
-        gradingScale: { min: 0, max: 20, passingGrade: 10 },
+        gradingScale: seed.gradingScale,
         grades: [
           makeGrade(seed, subject, periodIndex, subjectIndex, 0),
           makeGrade(seed, subject, periodIndex, subjectIndex, 1),
@@ -386,7 +457,7 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
     }
   }
 
-  const reportCards = makeReportCards(seed, periodAverage)
+  const reportCards = makeReportCards(seed, annualAverage)
   const schedule = makeSchedule(seed, classGroupId)
   const presence = makePresence(seed, identityId, enrollmentId, classGroupId)
   const payments = makePayments(seed, dashboard)
@@ -463,18 +534,24 @@ function makeSubjectAverages(
   seed: StudentSeed,
   periodIndex: number
 ): ParentReportSubjectAverage[] {
-  return seed.subjects.map((subject, subjectIndex) => ({
+  return seed.subjects.map((subject) => ({
     subjectLevelId: subjectId(seed, subject),
     subjectCode: subject.code,
     subjectColor: subject.color,
     subjectName: subject.name,
     coefficient: subject.coefficient,
-    average: round1(
-      subject.average - (2 - periodIndex) * 0.4 + (subjectIndex % 2) * 0.2
-    ),
+    average: periodSubjectAverage(seed, subject, periodIndex),
     gradeCount: 3,
-    min: 9 + (subjectIndex % 3),
-    max: 17 + (subjectIndex % 2),
+    min: clamp(
+      round1(periodSubjectAverage(seed, subject, periodIndex) - 1.2),
+      0,
+      seed.gradingScale.max
+    ),
+    max: clamp(
+      round1(periodSubjectAverage(seed, subject, periodIndex) + 1.1),
+      0,
+      seed.gradingScale.max
+    ),
   }))
 }
 
@@ -485,30 +562,47 @@ function makeGrade(
   subjectIndex: number,
   gradeIndex: number
 ) {
+  const targetAverage = periodSubjectAverage(seed, subject, periodIndex)
+  const scoreOffsets = [-0.6, 0.3, 0] as const
   const score = clamp(
-    round1(subject.average + (gradeIndex - 1) * 0.8 + periodIndex * 0.15),
+    round1(targetAverage + scoreOffsets[gradeIndex]!),
     0,
-    20
+    seed.gradingScale.max
   )
+  const evaluationDates = [
+    [localDate(2025, 10, 20), localDate(2025, 11, 17), localDate(2025, 12, 15)],
+    [localDate(2026, 1, 19), localDate(2026, 2, 16), localDate(2026, 3, 16)],
+    [localDate(2026, 4, 20), localDate(2026, 5, 18), localDate(2026, 6, 15)],
+  ] as const
   const date = shiftDays(
-    today,
-    -70 + periodIndex * 22 + subjectIndex * 2 + gradeIndex * 5
+    evaluationDates[periodIndex]![gradeIndex]!,
+    subjectIndex % 3
   )
-  const types = ["HOMEWORK", "QUIZ", "EXAM"] as const
+  const types = ["HOMEWORK", "EXAM", "EXAM"] as const
+  const titles = [
+    `Devoir régulier de ${subject.name}`,
+    `Devoir départemental de ${subject.name}`,
+    `Composition de ${subject.name}`,
+  ] as const
   return {
     evaluationId: `demo-grade-${seed.id}-${periodIndex}-${subject.code}-${gradeIndex}`,
-    title:
-      gradeIndex === 2
-        ? `Composition de ${subject.name}`
-        : `${types[gradeIndex]} ${subject.name}`,
+    title: titles[gradeIndex],
     type: types[gradeIndex],
     date: iso(date),
-    weight: gradeIndex === 2 ? 2 : 1,
+    weight: gradeIndex + 1,
     score,
     absent: false,
     comment:
-      score >= 16 ? "Très bon travail" : score >= 14 ? "Bon travail" : null,
-    classAverage: round1(11.8 + subjectIndex * 0.3),
+      score >= seed.gradingScale.max * 0.8
+        ? "Très bon travail"
+        : score >= seed.gradingScale.max * 0.7
+          ? "Bon travail"
+          : null,
+    classAverage: clamp(
+      round1(classAverageFor(seed, periodIndex) + (subjectIndex % 3) * 0.2),
+      0,
+      seed.gradingScale.max
+    ),
   }
 }
 
@@ -524,9 +618,11 @@ function makeReportCards(
     periodId: period.id,
     periodCode: period.code,
     periodName: period.name,
-    periodAverage: round1(average - (2 - index) * 0.45),
+    periodAverage: round1(
+      weightedAverageFromRows(makeSubjectAverages(seed, index))
+    ),
     annualAverage: null,
-    classAverage: round1(12.7 + index * 0.2),
+    classAverage: classAverageFor(seed, index),
     rank: Math.min(seed.rank + Math.max(0, 2 - index), seed.totalStudents),
     totalStudents: seed.totalStudents,
     generatedAt: iso(shiftDays(new Date(period.endDate), 2)),
@@ -544,10 +640,10 @@ function makeReportCards(
       periodName: null,
       periodAverage: null,
       annualAverage: average,
-      classAverage: 12.9,
+      classAverage: classAverageFor(seed, 2),
       rank: seed.rank,
       totalStudents: seed.totalStudents,
-      generatedAt: iso(shiftDays(today, -1)),
+      generatedAt: iso(localDate(2026, 6, 30)),
     },
   ]
 }
@@ -556,7 +652,17 @@ function makeSchedule(
   seed: StudentSeed,
   classGroupId: string
 ): StudentSchedule {
-  const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"] as const
+  const weekdays = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+  ] as const
+  const days =
+    seed.classCode === "TERM-D"
+      ? ([...weekdays, "SATURDAY"] as const)
+      : weekdays
   const times = [
     ["07:30", "08:25"],
     ["08:30", "09:25"],
@@ -590,6 +696,7 @@ function makeSchedule(
           identity: {
             firstName: teacherFirstName ?? null,
             lastName: teacherLastName.join(" ") || null,
+            photoUrl: getTeacherPhotoUrl(subject.teacher),
           },
         },
       }
@@ -610,8 +717,8 @@ function makePresence(
   enrollmentId: string,
   classGroupId: string
 ): ParentChildPresence {
-  const classDays = Array.from({ length: 18 }, (_, index) =>
-    iso(shiftDays(startOfMonth(today), index + 1))
+  const classDays = Array.from({ length: 25 }, (_, index) =>
+    iso(shiftDays(localDate(2026, 5, 1), index))
   ).filter((date) => ![0, 6].includes(new Date(date).getDay()))
   const history = classDays.slice(0, 12).flatMap((date, index) => {
     const isLate = index === 3 || index === 9
@@ -690,7 +797,7 @@ function makePresence(
         firstName: firstName ?? null,
         lastName: lastNameParts.join(" ") || null,
         name: subject.teacher,
-        photoUrl: null,
+        photoUrl: getTeacherPhotoUrl(subject.teacher),
       },
       classGroup: {
         id: classGroupId,
@@ -715,8 +822,8 @@ function makePresence(
       },
     },
     range: {
-      startDate: iso(startOfMonth(today)),
-      endDate: iso(endOfMonth(today)),
+      startDate: iso(localDate(2026, 5, 1)),
+      endDate: iso(localDate(2026, 5, 31)),
     },
     stats: {
       attendanceRate: round1(
@@ -743,11 +850,11 @@ function makePresence(
     plannedAbsences: [
       {
         id: `demo-planned-${seed.id}`,
-        date: iso(shiftDays(today, 8)),
+        date: iso(localDate(2026, 6, 2)),
         reason: "FAMILY",
         note: "Rendez-vous familial",
         status: "ACKNOWLEDGED",
-        createdAt: shiftDays(today, -2).toISOString(),
+        createdAt: localDate(2026, 5, 16).toISOString(),
       },
     ],
   }
@@ -762,7 +869,7 @@ function makePayments(
     {
       id: `demo-installment-${seed.id}-1`,
       sequence: 1,
-      dueDate: iso(shiftDays(today, -120)),
+      dueDate: iso(localDate(2025, 10, 31)),
       amount: Math.round(seed.totalFees * 0.5),
       paidAmount: Math.round(seed.totalFees * 0.5),
       remainingAmount: 0,
@@ -771,7 +878,7 @@ function makePayments(
     {
       id: `demo-installment-${seed.id}-2`,
       sequence: 2,
-      dueDate: iso(shiftDays(today, -15)),
+      dueDate: iso(localDate(2026, 1, 31)),
       amount: seed.totalFees - Math.round(seed.totalFees * 0.5),
       paidAmount: seed.totalPaid - Math.round(seed.totalFees * 0.5),
       remainingAmount: seed.balance,
@@ -802,7 +909,7 @@ function makePayments(
       1,
       installments[0]!.paidAmount,
       "MOBILE_MONEY",
-      -118
+      localDate(2025, 11, 3)
     ),
     makePayment(
       seed,
@@ -810,7 +917,7 @@ function makePayments(
       2,
       Math.max(10_000, installments[1]!.paidAmount),
       "CASH",
-      -24
+      localDate(2026, 1, 20)
     ),
   ]
   const child = {
@@ -826,7 +933,7 @@ function makePayments(
     latestGrade: {
       score: seed.subjects[0]!.average,
       evaluationTitle: `Devoir de ${seed.subjects[0]!.name}`,
-      date: iso(shiftDays(today, -3)),
+      date: iso(localDate(2026, 5, 15)),
     },
     balance: seed.balance,
     periodAverage: dashboard.grades.periodAverage,
@@ -865,7 +972,7 @@ function makePayment(
   index: number,
   amount: number,
   method: "CASH" | "MOBILE_MONEY",
-  dayOffset: number
+  createdAt: Date
 ): PaymentListItem {
   return {
     id: `demo-payment-${seed.id}-${index}`,
@@ -887,7 +994,7 @@ function makePayment(
         feeLabel: "Frais de scolarité",
       },
     ],
-    createdAt: shiftDays(today, dayOffset).toISOString(),
+    createdAt: withTime(createdAt, 10, 30).toISOString(),
     enrollment: {
       person: {
         id: `demo-identity-${seed.id}`,
@@ -908,42 +1015,41 @@ function makeEvaluations(
   seed: StudentSeed,
   classGroupId: string
 ): DemoEvaluation[] {
-  const offsets = [-14, -5, 1, 3, 6, 12]
-  const types = [
-    "HOMEWORK",
-    "QUIZ",
-    "ORAL",
-    "PROJECT",
-    "EXAM",
-    "HOMEWORK",
+  const calendar = [
+    [localDate(2025, 10, 22), localDate(2025, 11, 19), localDate(2025, 12, 17)],
+    [localDate(2026, 1, 21), localDate(2026, 2, 18), localDate(2026, 3, 18)],
+    [localDate(2026, 4, 22), localDate(2026, 5, 20), localDate(2026, 6, 17)],
   ] as const
-  return offsets.map((offset, index) => {
-    const subject = seed.subjects[index % seed.subjects.length]!
-    return {
-      id: `demo-evaluation-${seed.id}-${index}`,
-      title:
-        index === 4
-          ? `Composition de ${subject.name}`
-          : `Évaluation de ${subject.name}`,
-      type: types[index],
-      date: iso(shiftDays(today, offset)),
-      gradeCount: offset < 0 ? 1 : 0,
-      periodId: PERIODS[2]!.id,
-      classGroup: {
-        id: classGroupId,
-        code: seed.classCode,
-        name: seed.className,
-      },
-      subjectLevel: {
-        subject: {
-          id: `demo-subject-${subject.code.toLowerCase()}`,
-          code: subject.code,
-          color: subject.color,
-          name: subject.name,
+  const labels = ["Devoir régulier", "Devoir départemental", "Composition"]
+  const types = ["HOMEWORK", "EXAM", "EXAM"] as const
+
+  return calendar.flatMap((dates, periodIndex) =>
+    dates.map((date, evaluationIndex) => {
+      const index = periodIndex * dates.length + evaluationIndex
+      const subject = seed.subjects[index % seed.subjects.length]!
+      return {
+        id: `demo-evaluation-${seed.id}-${index}`,
+        title: `${labels[evaluationIndex]} de ${subject.name}`,
+        type: types[evaluationIndex]!,
+        date: iso(date),
+        gradeCount: 1,
+        periodId: PERIODS[periodIndex]!.id,
+        classGroup: {
+          id: classGroupId,
+          code: seed.classCode,
+          name: seed.className,
         },
-      },
-    }
-  })
+        subjectLevel: {
+          subject: {
+            id: `demo-subject-${subject.code.toLowerCase()}`,
+            code: subject.code,
+            color: subject.color,
+            name: subject.name,
+          },
+        },
+      }
+    })
+  )
 }
 
 function makeNotifications(seed: StudentSeed): AppNotification[] {
@@ -953,19 +1059,19 @@ function makeNotifications(seed: StudentSeed): AppNotification[] {
       id: `demo-notification-${seed.id}-grade`,
       type: "GRADE",
       title: "Nouvelle note publiée",
-      body: `${subject.name} : ${subject.average.toFixed(1)}/20`,
+      body: `${subject.name} : ${subject.average.toFixed(1)}/${seed.gradingScale.max}`,
       data: { section: "reports" },
       readAt: null,
-      createdAt: shiftDays(today, -1).toISOString(),
+      createdAt: localDate(2026, 5, 21).toISOString(),
     },
     {
       id: `demo-notification-${seed.id}-evaluation`,
       type: "SYSTEM",
       title: "Évaluation à venir",
-      body: `${seed.subjects[1]!.name}, dans 3 jours`,
+      body: `${seed.subjects[1]!.name}, le 17 juin`,
       data: { section: "evaluations" },
       readAt: null,
-      createdAt: shiftDays(today, -2).toISOString(),
+      createdAt: localDate(2026, 5, 19).toISOString(),
     },
     {
       id: `demo-notification-${seed.id}-payment`,
@@ -973,8 +1079,8 @@ function makeNotifications(seed: StudentSeed): AppNotification[] {
       title: "Paiement enregistré",
       body: `Un règlement de ${formatAmount(Math.min(seed.totalPaid, 75_000))} a été reçu.`,
       data: { section: "payments" },
-      readAt: shiftDays(today, -4).toISOString(),
-      createdAt: shiftDays(today, -5).toISOString(),
+      readAt: localDate(2026, 5, 14).toISOString(),
+      createdAt: localDate(2026, 5, 13).toISOString(),
     },
     {
       id: `demo-notification-${seed.id}-presence`,
@@ -982,8 +1088,8 @@ function makeNotifications(seed: StudentSeed): AppNotification[] {
       title: "Entrée enregistrée",
       body: "Passage au portail principal à 07:38.",
       data: { section: "presence" },
-      readAt: shiftDays(today, -7).toISOString(),
-      createdAt: shiftDays(today, -7).toISOString(),
+      readAt: localDate(2026, 5, 11).toISOString(),
+      createdAt: localDate(2026, 5, 11).toISOString(),
     },
   ]
 }
@@ -1034,6 +1140,24 @@ function weightedAverageFromRows(rows: ParentReportSubjectAverage[]): number {
   return total / coefficients
 }
 
+function periodSubjectAverage(
+  seed: StudentSeed,
+  subject: SubjectSeed,
+  periodIndex: number
+): number {
+  const progression = [-0.4, 0, 0.4] as const
+  return clamp(
+    round1(subject.average + progression[periodIndex]!),
+    seed.gradingScale.min,
+    seed.gradingScale.max
+  )
+}
+
+function classAverageFor(seed: StudentSeed, periodIndex: number): number {
+  const base = seed.gradingScale.max === 10 ? 6.7 : 12.7
+  return round1(base + periodIndex * 0.2)
+}
+
 function formatAmount(amount: number): string {
   return `${new Intl.NumberFormat("fr-FR").format(amount)} FCFA`
 }
@@ -1052,18 +1176,14 @@ function startOfDay(value: Date): Date {
   return date
 }
 
-function startOfMonth(value: Date): Date {
-  return new Date(value.getFullYear(), value.getMonth(), 1)
-}
-
-function endOfMonth(value: Date): Date {
-  return new Date(value.getFullYear(), value.getMonth() + 1, 0)
-}
-
 function shiftDays(value: Date, days: number): Date {
   const date = new Date(value)
   date.setDate(date.getDate() + days)
   return date
+}
+
+function localDate(year: number, month: number, day: number): Date {
+  return new Date(year, month - 1, day, 12, 0, 0, 0)
 }
 
 function withTime(value: Date, hours: number, minutes: number): Date {
@@ -1073,5 +1193,8 @@ function withTime(value: Date, hours: number, minutes: number): Date {
 }
 
 function iso(value: Date): string {
-  return startOfDay(value).toISOString().slice(0, 10)
+  const date = startOfDay(value)
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${date.getFullYear()}-${month}-${day}`
 }
