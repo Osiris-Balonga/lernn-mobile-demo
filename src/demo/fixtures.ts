@@ -18,6 +18,7 @@ import type {
   DemoCardCredential,
   DemoDatabase,
   DemoEvaluation,
+  DemoParentFixture,
   DemoStudentFixture,
   DemoStudentId,
 } from "./types"
@@ -335,6 +336,8 @@ const STUDENTS = Object.fromEntries(
   STUDENT_SEEDS.map((seed) => [seed.id, makeStudentFixture(seed)])
 ) as Record<DemoStudentId, DemoStudentFixture>
 
+const PARENT = makeParentFixture(["clara", "boris"])
+
 export const demoDatabase: DemoDatabase = {
   school: SCHOOL,
   credentials: STUDENT_SEEDS.map((seed) => ({
@@ -342,11 +345,15 @@ export const demoDatabase: DemoDatabase = {
     publicCode: seed.publicCode,
     qrTokenHash: seed.qrTokenHash,
   })),
-  accounts: STUDENT_SEEDS.map((seed) => ({
-    studentId: seed.id,
-    email: seed.email,
-    passwordHash: PASSWORD_HASH,
-  })),
+  accounts: [
+    ...STUDENT_SEEDS.map((seed) => ({
+      principalId: seed.id,
+      email: seed.email,
+      passwordHash: PASSWORD_HASH,
+    })),
+    PARENT.account,
+  ],
+  parents: { [PARENT.id]: PARENT },
   students: STUDENTS,
 }
 
@@ -356,9 +363,18 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
   const identityId = `demo-identity-${seed.id}`
   const enrollmentId = `demo-enrollment-${seed.id}`
   const classGroupId = `demo-class-${seed.id}`
-  const annualAverage = weightedAverage(seed.subjects)
+  const subjectAveragesByPeriod = PERIODS.map((_, periodIndex) =>
+    makeSubjectAverages(seed, periodIndex)
+  )
+  const periodAverages = subjectAveragesByPeriod.map((rows) =>
+    round1(weightedAverageFromRows(rows))
+  )
+  const annualAverage = round1(
+    periodAverages.reduce((sum, average) => sum + average, 0) /
+      periodAverages.length
+  )
   const currentPeriodAverage = round1(
-    weightedAverageFromRows(makeSubjectAverages(seed, 2))
+    weightedAverageFromRows(subjectAveragesByPeriod[2]!)
   )
   const card: DemoCardCredential = {
     studentId: seed.id,
@@ -384,10 +400,10 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
       periodAverage: currentPeriodAverage,
       rank: seed.rank,
       totalStudents: seed.totalStudents,
-      subjectAverages: seed.subjects.map((subject) => ({
-        subjectCode: subject.code,
-        subjectColor: subject.color,
-        subjectName: subject.name,
+      subjectAverages: subjectAveragesByPeriod[2]!.map((subject) => ({
+        subjectCode: subject.subjectCode,
+        subjectColor: subject.subjectColor,
+        subjectName: subject.subjectName,
         average: subject.average,
       })),
     },
@@ -404,7 +420,7 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
   const gradesByPeriod: Record<string, ParentChildrenGrades> = {}
   const subjectGradesByPeriod: Record<string, ParentChildSubjectGrades> = {}
   for (const [periodIndex, period] of PERIODS.entries()) {
-    const subjectAverages = makeSubjectAverages(seed, periodIndex)
+    const subjectAverages = subjectAveragesByPeriod[periodIndex]!
     gradesByPeriod[period.id] = {
       schoolYear: { id: SCHOOL_YEAR_ID, label: "2025-2026" },
       period,
@@ -452,21 +468,26 @@ function makeStudentFixture(seed: StudentSeed): DemoStudentFixture {
           makeGrade(seed, subject, periodIndex, subjectIndex, 0),
           makeGrade(seed, subject, periodIndex, subjectIndex, 1),
           makeGrade(seed, subject, periodIndex, subjectIndex, 2),
+          makeGrade(seed, subject, periodIndex, subjectIndex, 3),
         ],
       }
     }
   }
 
-  const reportCards = makeReportCards(seed, annualAverage)
+  const reportCards = makeReportCards(
+    seed,
+    annualAverage,
+    subjectAveragesByPeriod
+  )
   const schedule = makeSchedule(seed, classGroupId)
   const presence = makePresence(seed, identityId, enrollmentId, classGroupId)
   const payments = makePayments(seed, dashboard)
-  const evaluations = makeEvaluations(seed, classGroupId)
+  const evaluations = makeEvaluations(seed, classGroupId, subjectGradesByPeriod)
 
   return {
     id: seed.id,
     account: {
-      studentId: seed.id,
+      principalId: seed.id,
       email: seed.email,
       passwordHash: PASSWORD_HASH,
     },
@@ -534,25 +555,31 @@ function makeSubjectAverages(
   seed: StudentSeed,
   periodIndex: number
 ): ParentReportSubjectAverage[] {
-  return seed.subjects.map((subject) => ({
-    subjectLevelId: subjectId(seed, subject),
-    subjectCode: subject.code,
-    subjectColor: subject.color,
-    subjectName: subject.name,
-    coefficient: subject.coefficient,
-    average: periodSubjectAverage(seed, subject, periodIndex),
-    gradeCount: 3,
-    min: clamp(
-      round1(periodSubjectAverage(seed, subject, periodIndex) - 1.2),
-      0,
-      seed.gradingScale.max
-    ),
-    max: clamp(
-      round1(periodSubjectAverage(seed, subject, periodIndex) + 1.1),
-      0,
-      seed.gradingScale.max
-    ),
-  }))
+  return seed.subjects.map((subject, subjectIndex) => {
+    const grades = [0, 1, 2, 3].map((gradeIndex) =>
+      makeGrade(seed, subject, periodIndex, subjectIndex, gradeIndex)
+    )
+    const scoredGrades = grades.filter((grade) => grade.score !== null)
+    const average = round1(
+      scoredGrades.reduce(
+        (sum, grade) => sum + (grade.score ?? 0) * grade.weight,
+        0
+      ) / scoredGrades.reduce((sum, grade) => sum + grade.weight, 0)
+    )
+    const scores = scoredGrades.map((grade) => grade.score ?? 0)
+
+    return {
+      subjectLevelId: subjectId(seed, subject),
+      subjectCode: subject.code,
+      subjectColor: subject.color,
+      subjectName: subject.name,
+      coefficient: subject.coefficient,
+      average,
+      gradeCount: grades.length,
+      min: Math.min(...scores),
+      max: Math.max(...scores),
+    }
+  })
 }
 
 function makeGrade(
@@ -563,24 +590,30 @@ function makeGrade(
   gradeIndex: number
 ) {
   const targetAverage = periodSubjectAverage(seed, subject, periodIndex)
-  const scoreOffsets = [-0.6, 0.3, 0] as const
-  const score = clamp(
-    round1(targetAverage + scoreOffsets[gradeIndex]!),
-    0,
-    seed.gradingScale.max
+  const scoreOffsets = [-0.8, 0.4, 0.3, 0] as const
+  const absent =
+    seed.id === "boris" &&
+    periodIndex === 1 &&
+    subject.code === "HGE" &&
+    gradeIndex === 0
+  const score = absent
+    ? 0
+    : clamp(
+        round1(targetAverage + scoreOffsets[gradeIndex]!),
+        0,
+        seed.gradingScale.max
+      )
+  const date = evaluationDate(
+    periodIndex,
+    gradeIndex,
+    subjectIndex,
+    seed.classCode === "TERM-D"
   )
-  const evaluationDates = [
-    [localDate(2025, 10, 20), localDate(2025, 11, 17), localDate(2025, 12, 15)],
-    [localDate(2026, 1, 19), localDate(2026, 2, 16), localDate(2026, 3, 16)],
-    [localDate(2026, 4, 20), localDate(2026, 5, 18), localDate(2026, 6, 15)],
-  ] as const
-  const date = shiftDays(
-    evaluationDates[periodIndex]![gradeIndex]!,
-    subjectIndex % 3
-  )
-  const types = ["HOMEWORK", "EXAM", "EXAM"] as const
+  const types = ["HOMEWORK", "HOMEWORK", "EXAM", "EXAM"] as const
+  const weights = [1, 1, 2, 3] as const
   const titles = [
-    `Devoir régulier de ${subject.name}`,
+    `Devoir régulier 1 de ${subject.name}`,
+    `Devoir régulier 2 de ${subject.name}`,
     `Devoir départemental de ${subject.name}`,
     `Composition de ${subject.name}`,
   ] as const
@@ -589,11 +622,12 @@ function makeGrade(
     title: titles[gradeIndex],
     type: types[gradeIndex],
     date: iso(date),
-    weight: gradeIndex + 1,
+    weight: weights[gradeIndex],
     score,
-    absent: false,
-    comment:
-      score >= seed.gradingScale.max * 0.8
+    absent,
+    comment: absent
+      ? "Absent"
+      : score >= seed.gradingScale.max * 0.8
         ? "Très bon travail"
         : score >= seed.gradingScale.max * 0.7
           ? "Bon travail"
@@ -608,7 +642,8 @@ function makeGrade(
 
 function makeReportCards(
   seed: StudentSeed,
-  average: number
+  average: number,
+  subjectAveragesByPeriod: ParentReportSubjectAverage[][]
 ): ChildReportCard[] {
   const periodCards = PERIODS.map((period, index) => ({
     id: `demo-report-${seed.id}-${period.code}`,
@@ -619,7 +654,7 @@ function makeReportCards(
     periodCode: period.code,
     periodName: period.name,
     periodAverage: round1(
-      weightedAverageFromRows(makeSubjectAverages(seed, index))
+      weightedAverageFromRows(subjectAveragesByPeriod[index]!)
     ),
     annualAverage: null,
     classAverage: classAverageFor(seed, index),
@@ -1013,43 +1048,85 @@ function makePayment(
 
 function makeEvaluations(
   seed: StudentSeed,
-  classGroupId: string
+  classGroupId: string,
+  subjectGradesByPeriod: Record<string, ParentChildSubjectGrades>
 ): DemoEvaluation[] {
-  const calendar = [
-    [localDate(2025, 10, 22), localDate(2025, 11, 19), localDate(2025, 12, 17)],
-    [localDate(2026, 1, 21), localDate(2026, 2, 18), localDate(2026, 3, 18)],
-    [localDate(2026, 4, 22), localDate(2026, 5, 20), localDate(2026, 6, 17)],
-  ] as const
-  const labels = ["Devoir régulier", "Devoir départemental", "Composition"]
-  const types = ["HOMEWORK", "EXAM", "EXAM"] as const
-
-  return calendar.flatMap((dates, periodIndex) =>
-    dates.map((date, evaluationIndex) => {
-      const index = periodIndex * dates.length + evaluationIndex
-      const subject = seed.subjects[index % seed.subjects.length]!
-      return {
-        id: `demo-evaluation-${seed.id}-${index}`,
-        title: `${labels[evaluationIndex]} de ${subject.name}`,
-        type: types[evaluationIndex]!,
-        date: iso(date),
-        gradeCount: 1,
-        periodId: PERIODS[periodIndex]!.id,
-        classGroup: {
-          id: classGroupId,
-          code: seed.classCode,
-          name: seed.className,
+  return Object.values(subjectGradesByPeriod).flatMap((detail) =>
+    detail.grades.map((grade) => ({
+      id: grade.evaluationId,
+      title: grade.title,
+      type: grade.type,
+      date: grade.date,
+      gradeCount: 1,
+      periodId: detail.period.id,
+      classGroup: {
+        id: classGroupId,
+        code: seed.classCode,
+        name: seed.className,
+      },
+      subjectLevel: {
+        subject: {
+          id: `demo-subject-${detail.subjectCode.toLowerCase()}`,
+          code: detail.subjectCode,
+          color: detail.subjectColor ?? "#00684A",
+          name: detail.subjectName,
         },
-        subjectLevel: {
-          subject: {
-            id: `demo-subject-${subject.code.toLowerCase()}`,
-            code: subject.code,
-            color: subject.color,
-            name: subject.name,
-          },
-        },
-      }
-    })
+      },
+    }))
   )
+}
+
+function makeParentFixture(childIds: DemoStudentId[]): DemoParentFixture {
+  const id = "parent-makaya" as const
+  const email = "sandrine.makaya.demo@ndg.lernn.local"
+  const children = childIds.map((childId) => STUDENTS[childId])
+
+  return {
+    id,
+    account: { principalId: id, email, passwordHash: PASSWORD_HASH },
+    childIds,
+    user: {
+      id: "demo-user-parent-makaya",
+      email,
+      firstName: "Sandrine",
+      lastName: "Makaya",
+      photoUrl: null,
+      role: "PARENT",
+      schoolAccess: [
+        {
+          schoolId: SCHOOL.id,
+          schoolName: SCHOOL.name,
+          organizationId: SCHOOL.organizationId,
+          organizationName: SCHOOL.organizationName,
+          role: "PARENT",
+        },
+      ],
+    },
+    profile: {
+      id: "demo-profile-parent-makaya",
+      type: "personal",
+      role: "PARENT",
+      schoolId: SCHOOL.id,
+      schoolName: SCHOOL.name,
+      organizationId: SCHOOL.organizationId,
+      label: "Sandrine Makaya",
+      icon: "users",
+      photoUrl: null,
+      schoolLogoUrl: SCHOOL.logoUrl,
+      firstName: "Sandrine",
+      lastName: "Makaya",
+      setupComplete: true,
+      capabilities: ["dashboard.view"],
+    },
+    schoolYears: children[0]?.schoolYears ?? [],
+    notifications: children
+      .flatMap((child) => child.notifications)
+      .sort(
+        (left, right) =>
+          new Date(right.createdAt).getTime() -
+          new Date(left.createdAt).getTime()
+      ),
+  }
 }
 
 function makeNotifications(seed: StudentSeed): AppNotification[] {
@@ -1119,18 +1196,6 @@ function subjectId(seed: StudentSeed, subject: SubjectSeed): string {
   return `demo-subject-level-${seed.id}-${subject.code.toLowerCase()}`
 }
 
-function weightedAverage(subjects: SubjectSeed[]): number {
-  const total = subjects.reduce(
-    (sum, subject) => sum + subject.average * subject.coefficient,
-    0
-  )
-  const coefficients = subjects.reduce(
-    (sum, subject) => sum + subject.coefficient,
-    0
-  )
-  return round1(total / coefficients)
-}
-
 function weightedAverageFromRows(rows: ParentReportSubjectAverage[]): number {
   const total = rows.reduce(
     (sum, row) => sum + (row.average ?? 0) * row.coefficient,
@@ -1179,6 +1244,40 @@ function startOfDay(value: Date): Date {
 function shiftDays(value: Date, days: number): Date {
   const date = new Date(value)
   date.setDate(date.getDate() + days)
+  return date
+}
+
+function evaluationDate(
+  periodIndex: number,
+  gradeIndex: number,
+  subjectIndex: number,
+  allowSaturday: boolean
+): Date {
+  const months = [
+    [2025, 10, 12],
+    [2026, 1, 3],
+    [2026, 4, 6],
+  ] as const
+  const [year, regularMonth, compositionMonth] = months[periodIndex]!
+  const month =
+    gradeIndex === 0
+      ? regularMonth
+      : gradeIndex === 1 || gradeIndex === 2
+        ? regularMonth + 1
+        : compositionMonth
+  const day =
+    gradeIndex === 0
+      ? 7 + ((subjectIndex * 3) % 18)
+      : gradeIndex === 1
+        ? 4 + ((subjectIndex * 3 + 1) % 9)
+        : gradeIndex === 2
+          ? 14 + ((subjectIndex * 5 + 2) % 11)
+          : 5 + ((subjectIndex * 7 + 4) % 17)
+  const date = localDate(year, month, day)
+
+  while (date.getDay() === 0 || (!allowSaturday && date.getDay() === 6)) {
+    date.setDate(date.getDate() + 1)
+  }
   return date
 }
 

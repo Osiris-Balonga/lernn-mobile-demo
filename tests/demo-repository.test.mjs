@@ -10,6 +10,7 @@ import { demoDatabase, DEMO_PASSWORD } from "../src/demo/fixtures.ts"
 import {
   listDemoAccounts,
   requestDemo,
+  resolvePrincipalByPassword,
   resolveStudentByPassword,
   resolveStudentByPublicCode,
   resolveStudentByQrToken,
@@ -40,18 +41,28 @@ function installBrowserStorage() {
   return { localStorage, sessionStorage }
 }
 
-test("publishes exactly the three student demo accounts used by the picker", () => {
+test("publishes the three student accounts and the unified parent account", () => {
   assert.deepEqual(listDemoAccounts(), [
-    { studentId: "clara", email: "clara.makaya.demo@ndg.lernn.local" },
-    { studentId: "boris", email: "boris.mbemba.demo@ndg.lernn.local" },
-    { studentId: "mireille", email: "mireille.nsimba.demo@ndg.lernn.local" },
+    { principalId: "clara", email: "clara.makaya.demo@ndg.lernn.local" },
+    { principalId: "boris", email: "boris.mbemba.demo@ndg.lernn.local" },
+    {
+      principalId: "mireille",
+      email: "mireille.nsimba.demo@ndg.lernn.local",
+    },
+    {
+      principalId: "parent-makaya",
+      email: "sandrine.makaya.demo@ndg.lernn.local",
+    },
   ])
 })
 
 test("authenticates every demo account and rejects a wrong password", async () => {
   for (const account of demoDatabase.accounts) {
-    const student = await resolveStudentByPassword(account.email, DEMO_PASSWORD)
-    assert.equal(student?.id, account.studentId)
+    const principal = await resolvePrincipalByPassword(
+      account.email,
+      DEMO_PASSWORD
+    )
+    assert.equal(principal?.id, account.principalId)
   }
 
   assert.equal(
@@ -61,6 +72,65 @@ test("authenticates every demo account and rejects a wrong password", async () =
     ),
     null
   )
+})
+
+test("serves the unified parent dashboard and every child switch endpoint", async () => {
+  installBrowserStorage()
+  await requestDemo({
+    method: "POST",
+    path: "/auth/login",
+    body: {
+      email: "sandrine.makaya.demo@ndg.lernn.local",
+      password: DEMO_PASSWORD,
+    },
+  })
+
+  const dashboard = await requestDemo({
+    method: "GET",
+    path: "/schools/demo-school-ndg01/dashboards/parent",
+  })
+  assert.deepEqual(
+    dashboard.data.children.map(
+      ({ firstName, lastName }) => `${firstName} ${lastName}`
+    ),
+    ["Clara Makaya", "Boris Mbemba"]
+  )
+  assert.equal(dashboard.data.familyTotalBalance, 100_000)
+
+  const grades = await requestDemo({
+    method: "GET",
+    path: "/schools/demo-school-ndg01/evaluations/parent/children",
+    params: { periodId: "demo-period-t3" },
+  })
+  assert.equal(grades.data.children.length, 2)
+
+  for (const child of grades.data.children) {
+    const [subject] = child.subjectAverages
+    const endpoints = [
+      `/schools/demo-school-ndg01/evaluations/parent/children/${child.enrollmentId}/subjects/${subject.subjectLevelId}`,
+      `/schools/demo-school-ndg01/evaluations/parent/children/${child.enrollmentId}/report-cards`,
+      `/schools/demo-school-ndg01/presence/parent/children/${child.identityId}`,
+      `/schools/demo-school-ndg01/payments/balance/student-enrollments/${child.enrollmentId}`,
+      `/schools/demo-school-ndg01/schedules/class/${child.classGroup.id}`,
+    ]
+    for (const path of endpoints) {
+      const response = await requestDemo({
+        method: "GET",
+        path,
+        params: {
+          periodId: "demo-period-t3",
+          studentEnrollmentId: child.enrollmentId,
+        },
+      })
+      assert.ok(response.data, path)
+    }
+  }
+
+  const payments = await requestDemo({
+    method: "GET",
+    path: "/schools/demo-school-ndg01/payments/parent/history",
+  })
+  assert.equal(payments.data.length, 4)
 })
 
 test("normalizes manual card codes and maps all three printed cards", () => {

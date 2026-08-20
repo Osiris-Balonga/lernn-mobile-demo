@@ -7,16 +7,16 @@ const pickerSource = readFileSync(
   "utf8"
 )
 
-test("offers one complete account for every student demo cycle", () => {
+test("offers every student cycle plus the unified parent account", () => {
   const optionsSource = pickerSource.slice(
     pickerSource.indexOf("const DEMO_ACCOUNT_OPTIONS"),
     pickerSource.indexOf("] as const")
   )
-  const studentIds = [...optionsSource.matchAll(/studentId: "([^"]+)"/g)].map(
+  const accountIds = [...optionsSource.matchAll(/id: "([^"]+)"/g)].map(
     (match) => match[1]
   )
 
-  assert.deepEqual(studentIds, ["clara", "boris", "mireille"])
+  assert.deepEqual(accountIds, ["clara", "boris", "mireille", "parent-makaya"])
   assert.match(pickerSource, /name: "Clara Makaya"/)
   assert.match(pickerSource, /className: "CE1-A"/)
   assert.match(pickerSource, /cycle: "Primaire"/)
@@ -26,6 +26,9 @@ test("offers one complete account for every student demo cycle", () => {
   assert.match(pickerSource, /name: "Mireille Nsimba"/)
   assert.match(pickerSource, /className: "TERM-D"/)
   assert.match(pickerSource, /cycle: "Lycée"/)
+  assert.match(pickerSource, /name: "Sandrine Makaya"/)
+  assert.match(pickerSource, /className: "Clara & Boris"/)
+  assert.match(pickerSource, /cycle: "Parent"/)
 })
 
 test("keeps the demo picker keyboard and touch accessible", () => {

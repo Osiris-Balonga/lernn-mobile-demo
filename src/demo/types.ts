@@ -12,12 +12,14 @@ import type { StudentSchedule } from "../features/student/normalizers"
 import type { StudentDashboard } from "../features/student/types"
 
 export type DemoStudentId = "clara" | "boris" | "mireille"
+export type DemoParentId = "parent-makaya"
+export type DemoPrincipalId = DemoStudentId | DemoParentId
 
 export type DemoAuthMethod = "card-code" | "card-qr" | "password"
 
 export interface DemoSession {
-  version: 1
-  studentId: DemoStudentId
+  version: 2
+  principalId: DemoPrincipalId
   authMethod: DemoAuthMethod
   issuedAt: string
   expiresAt: string
@@ -30,9 +32,19 @@ export interface DemoCardCredential {
 }
 
 export interface DemoAccount {
-  studentId: DemoStudentId
+  principalId: DemoPrincipalId
   email: string
   passwordHash: string
+}
+
+export interface DemoParentFixture {
+  id: DemoParentId
+  account: DemoAccount
+  childIds: DemoStudentId[]
+  notifications: AppNotification[]
+  profile: UserProfile
+  schoolYears: MobileSchoolYear[]
+  user: AuthUser
 }
 
 export interface DemoEvaluation {
@@ -82,6 +94,7 @@ export interface DemoDatabase {
   }
   credentials: DemoCardCredential[]
   accounts: DemoAccount[]
+  parents: Record<DemoParentId, DemoParentFixture>
   students: Record<DemoStudentId, DemoStudentFixture>
 }
 

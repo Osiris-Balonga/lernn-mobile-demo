@@ -1,6 +1,6 @@
 # Lernn Mobile — Démo
 
-Reproduction statique de l’espace élève Lernn Mobile, destinée aux démonstrations commerciales. Le site fonctionne sans API ni base de données : les comptes, cartes et données scolaires de démonstration sont fournis par des fixtures locales.
+Reproduction statique des espaces élève et parent de Lernn Mobile, destinée aux démonstrations commerciales. Le site fonctionne sans API ni base de données : les comptes, cartes et données scolaires de démonstration sont fournis par des fixtures locales.
 
 ## Démonstration
 
@@ -17,6 +17,8 @@ La connexion est disponible par identifiants classiques ainsi que par carte Lern
 | Primaire | Clara Makaya    | `clara.makaya.demo@ndg.lernn.local`    | `DemoLernn2026!` | `NDG01-STU-0013` |
 | Collège  | Boris Mbemba    | `boris.mbemba.demo@ndg.lernn.local`    | `DemoLernn2026!` | `NDG01-STU-0501` |
 | Lycée    | Mireille Nsimba | `mireille.nsimba.demo@ndg.lernn.local` | `DemoLernn2026!` | `NDG01-STU-1201` |
+
+Le compte Parent unifié `sandrine.makaya.demo@ndg.lernn.local` utilise le même mot de passe et donne accès aux données consolidées de Clara Makaya et Boris Mbemba. Les noms et codes des trois élèves restent strictement identiques aux cartes imprimées.
 
 Ces identifiants sont exclusivement destinés à la démonstration. Les QR imprimés sont reconnus par leur empreinte SHA-256 : leur secret brut n’est pas publié dans le dépôt. Aucune donnée réelle ou sensible ne doit être ajoutée au dépôt.
 

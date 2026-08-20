@@ -8,18 +8,18 @@ export type DemoAccountSelection = {
 
 type DemoAccountOption = {
   className: string
-  cycle: "Collège" | "Lycée" | "Primaire"
+  cycle: "Collège" | "Lycée" | "Primaire" | "Parent"
   email: string
+  id: "boris" | "clara" | "mireille" | "parent-makaya"
   name: string
-  photoUrl: string
-  studentId: "boris" | "clara" | "mireille"
+  photoUrl: string | null
 }
 
 const DEMO_PASSWORD = "DemoLernn2026!"
 
 const DEMO_ACCOUNT_OPTIONS: readonly DemoAccountOption[] = [
   {
-    studentId: "clara",
+    id: "clara",
     name: "Clara Makaya",
     className: "CE1-A",
     cycle: "Primaire",
@@ -27,7 +27,7 @@ const DEMO_ACCOUNT_OPTIONS: readonly DemoAccountOption[] = [
     photoUrl: "/student-photos/girl-01.png",
   },
   {
-    studentId: "boris",
+    id: "boris",
     name: "Boris Mbemba",
     className: "5E-A",
     cycle: "Collège",
@@ -35,12 +35,20 @@ const DEMO_ACCOUNT_OPTIONS: readonly DemoAccountOption[] = [
     photoUrl: "/student-photos/boy-03.png",
   },
   {
-    studentId: "mireille",
+    id: "mireille",
     name: "Mireille Nsimba",
     className: "TERM-D",
     cycle: "Lycée",
     email: "mireille.nsimba.demo@ndg.lernn.local",
     photoUrl: "/student-photos/girl-04.png",
+  },
+  {
+    id: "parent-makaya",
+    name: "Sandrine Makaya",
+    className: "Clara & Boris",
+    cycle: "Parent",
+    email: "sandrine.makaya.demo@ndg.lernn.local",
+    photoUrl: null,
   },
 ] as const
 
@@ -71,7 +79,7 @@ export function DemoAccountPicker({
         className="-mx-1 flex [scrollbar-width:none] gap-2 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden"
       >
         {DEMO_ACCOUNT_OPTIONS.map((account) => (
-          <li className="shrink-0" key={account.studentId}>
+          <li className="shrink-0" key={account.id}>
             <button
               aria-label={`Préremplir le compte de ${account.name}, ${account.className}, cycle ${account.cycle}`}
               className="flex min-h-14 min-w-44 items-center gap-3 rounded-xl border bg-background p-2 text-left outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
@@ -81,10 +89,12 @@ export function DemoAccountPicker({
               type="button"
             >
               <Avatar className="size-10" size="lg">
-                <AvatarImage
-                  alt={`Photo de ${account.name}`}
-                  src={withAppBase(account.photoUrl)}
-                />
+                {account.photoUrl ? (
+                  <AvatarImage
+                    alt={`Photo de ${account.name}`}
+                    src={withAppBase(account.photoUrl)}
+                  />
+                ) : null}
                 <AvatarFallback className="bg-brand-soft font-semibold text-brand-dark">
                   {getInitials(account.name)}
                 </AvatarFallback>

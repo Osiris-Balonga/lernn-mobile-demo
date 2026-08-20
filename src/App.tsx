@@ -5639,17 +5639,23 @@ function ParentSubjectDetail({
                         })}
                       </div>
                     </div>
-                    <ReportGradeBadge
-                      gradingScale={gradingScale}
-                      value={
-                        shouldMaskSubjectEvaluationScore(
-                          evaluation,
-                          paymentBlockReason
-                        )
-                          ? null
-                          : evaluation.score
-                      }
-                    />
+                    {evaluation.absent ? (
+                      <Badge variant="destructive">
+                        {m.mobile_status_absent()}
+                      </Badge>
+                    ) : (
+                      <ReportGradeBadge
+                        gradingScale={gradingScale}
+                        value={
+                          shouldMaskSubjectEvaluationScore(
+                            evaluation,
+                            paymentBlockReason
+                          )
+                            ? null
+                            : evaluation.score
+                        }
+                      />
+                    )}
                   </div>
                   {index < evaluations.length - 1 && <Separator />}
                 </div>

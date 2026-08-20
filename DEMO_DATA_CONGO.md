@@ -23,10 +23,22 @@ partir des notes et de ces pondérations, puis arrondies au dixième.
 
 ## Évaluations et présence
 
-Chaque trimestre contient des devoirs réguliers, un devoir départemental au
-deuxième mois et une composition au troisième mois. Les présences sont datées
-sur des jours de classe. Les emplois du temps vont du lundi au vendredi, avec
-le samedi uniquement pour la Terminale D, classe d’examen.
+Pour chaque matière et chaque trimestre, une note correspond exactement à une
+évaluation : devoir régulier au premier mois, devoir départemental au deuxième
+mois et composition au troisième mois. Les dates sont réparties sur plusieurs
+jours ouvrés. Une absence est enregistrée à la fois par le statut `Absent` et
+par une note de zéro afin de conserver des calculs explicites et vérifiables.
+Les présences sont datées sur des jours de classe. Les emplois du temps vont du
+lundi au vendredi, avec le samedi uniquement pour la Terminale D, classe
+d’examen.
+
+## Profil parent
+
+Le compte de Sandrine Makaya regroupe Clara Makaya et Boris Mbemba sans
+modifier leurs identités ni leurs codes de carte imprimés. Le tableau de bord
+additionne les soldes de la famille et conserve la ventilation par enfant ;
+les notes, présences, matières et emplois du temps sont accessibles grâce au
+sélecteur d’enfant de l’interface mobile d’origine.
 
 ## Avatars enseignants
 

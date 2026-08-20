@@ -1,6 +1,6 @@
-import type { DemoAuthMethod, DemoSession, DemoStudentId } from "./types.ts"
+import type { DemoAuthMethod, DemoPrincipalId, DemoSession } from "./types.ts"
 
-export const DEMO_SESSION_KEY = "lernn-mobile-demo:session:v1"
+export const DEMO_SESSION_KEY = "lernn-mobile-demo:session:v2"
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 interface StorageLike {
@@ -15,14 +15,14 @@ function getBrowserStorage(kind: "local" | "session"): StorageLike | null {
 }
 
 export function createDemoSession(
-  studentId: DemoStudentId,
+  principalId: DemoPrincipalId,
   authMethod: DemoAuthMethod,
   remember = true,
   now = new Date()
 ): DemoSession {
   const session: DemoSession = {
-    version: 1,
-    studentId,
+    version: 2,
+    principalId,
     authMethod,
     issuedAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + SESSION_TTL_MS).toISOString(),
@@ -56,15 +56,18 @@ function readSession(
 
   try {
     const value = JSON.parse(raw) as Partial<DemoSession>
-    const validStudent = ["clara", "boris", "mireille"].includes(
-      value.studentId ?? ""
-    )
+    const validPrincipal = [
+      "clara",
+      "boris",
+      "mireille",
+      "parent-makaya",
+    ].includes(value.principalId ?? "")
     const validMethod = ["password", "card-code", "card-qr"].includes(
       value.authMethod ?? ""
     )
     if (
-      value.version !== 1 ||
-      !validStudent ||
+      value.version !== 2 ||
+      !validPrincipal ||
       !validMethod ||
       typeof value.issuedAt !== "string" ||
       typeof value.expiresAt !== "string" ||

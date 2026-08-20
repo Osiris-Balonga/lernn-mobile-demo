@@ -120,7 +120,7 @@ test("reserves Saturday classes for the examination class", () => {
   }
 })
 
-test("places regular, departmental and composition evaluations in each trimester", () => {
+test("links every grade to one evaluation and spreads all evaluation types", () => {
   const expectedMonths = [
     [10, 11, 12],
     [1, 2, 3],
@@ -135,18 +135,57 @@ test("places regular, departmental and composition evaluations in each trimester
       const evaluations = student.evaluations.filter(
         ({ periodId }) => periodId === period.id
       )
-      assert.equal(evaluations.length, 3)
-      assert.match(evaluations[0].title, /^Devoir régulier/)
-      assert.match(evaluations[1].title, /^Devoir départemental/)
-      assert.match(evaluations[2].title, /^Composition/)
+      assert.equal(evaluations.length, student.dashboard.subjects.length * 4)
+
+      const grades = Object.values(student.subjectGradesByPeriod)
+        .filter((detail) => detail.period.id === period.id)
+        .flatMap((detail) => detail.grades)
       assert.deepEqual(
-        evaluations.map(
-          ({ date }) => new Date(`${date}T12:00:00`).getMonth() + 1
-        ),
-        expectedMonths[periodIndex]
+        new Set(grades.map(({ evaluationId }) => evaluationId)),
+        new Set(evaluations.map(({ id }) => id))
       )
+
+      for (const [title, months, multiplier] of [
+        [
+          "Devoir régulier",
+          [expectedMonths[periodIndex][0], expectedMonths[periodIndex][1]],
+          2,
+        ],
+        ["Devoir départemental", [expectedMonths[periodIndex][1]], 1],
+        ["Composition", [expectedMonths[periodIndex][2]], 1],
+      ]) {
+        const matching = evaluations.filter((evaluation) =>
+          evaluation.title.startsWith(title)
+        )
+        assert.equal(
+          matching.length,
+          student.dashboard.subjects.length * multiplier
+        )
+        assert.ok(new Set(matching.map(({ date }) => date)).size >= 3)
+        assert.ok(
+          matching.every(({ date }) =>
+            months.includes(new Date(`${date}T12:00:00`).getMonth() + 1)
+          )
+        )
+      }
     }
   }
+})
+
+test("represents an evaluation absence with both a zero and an absent status", () => {
+  const absentGrades = Object.values(
+    demoDatabase.students.boris.subjectGradesByPeriod
+  ).flatMap((detail) => detail.grades.filter(({ absent }) => absent))
+
+  assert.ok(absentGrades.length > 0)
+  assert.ok(absentGrades.every(({ score }) => score === 0))
+  assert.ok(
+    absentGrades.every(({ evaluationId }) =>
+      demoDatabase.students.boris.evaluations.some(
+        ({ id }) => id === evaluationId
+      )
+    )
+  )
 })
 
 test("provides a generated portrait for every teacher", async () => {
